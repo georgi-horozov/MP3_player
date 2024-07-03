@@ -2,17 +2,44 @@ from tkinter import *
 
 import pygame
 from tkinter import filedialog
+import time
+from mutagen.mp3 import MP3
+import tkinter.ttk as ttk
 
 wnd = Tk()
 wnd.title("Georgi Horozov MP3 Player")
-wnd.geometry("450x500")
+wnd.geometry("450x550")
 wnd_icon = PhotoImage(file="logo/head_phones.png")
 wnd.iconphoto(False, wnd_icon)
 
-song_box = Listbox(wnd, width=65, height=18, bg="#FFE4C4", fg="black")
+song_box = Listbox(wnd, width=65, height=18, bg="#333333", fg="white")
 song_box.pack(pady=20)
 
 pygame.mixer.init()
+
+
+song_length = 0
+
+
+def duration():
+    current_time = pygame.mixer.music.get_pos() / 1000
+
+    converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
+
+    song = song_box.get(ACTIVE)
+    song = f"C:/Users/Admin/PycharmProjects/MP3_player/audio/{song}.mp3"
+    song_mutagen = MP3(song)
+
+    global song_length
+    song_length = song_mutagen.info.length
+
+    converted_song_length = time.strftime("%M:%S", time.gmtime(song_length))
+
+    time_field.config(text=f"Elapsed time: {converted_current_time} of {converted_song_length}")
+
+    music_slider.config(value=int(current_time))
+
+    time_field.after(1000, duration)
 
 
 def add_one_song():
@@ -48,10 +75,17 @@ def play():
     pygame.mixer.music.load(song)
     pygame.mixer.music.play(loops=0)
 
+    duration()
+
+    slider_position = int(song_length)
+    music_slider.config(to=slider_position, value=0)
+
 
 def stop():
     pygame.mixer.music.stop()
     song_box.select_clear(ACTIVE)
+
+    time_field.config(text="")
 
 
 paused = False
@@ -111,6 +145,10 @@ def previous_song():
     song_box.selection_set(previous_one)
 
 
+def slide(x):
+    slider_label.config(text=f"{int(music_slider.get())} of {int(song_length)}")
+
+
 play_btn_img = PhotoImage(file="buttons/btn_play.png")
 stop_btn_img = PhotoImage(file="buttons/btn_stop.png")
 forward_btn_img = PhotoImage(file="buttons/btn_forward.png")
@@ -144,5 +182,15 @@ delete_song_menu = Menu(main_menu)
 main_menu.add_cascade(label="Delete Song", menu=delete_song_menu)
 delete_song_menu.add_command(label="Delete One Song", command=delete_one_song)
 delete_song_menu.add_command(label="Delete All Songs", command=delete_all_songs)
+
+time_field = Label(wnd, text="", bd=1, anchor=W)
+time_field.pack(fill=X, side=BOTTOM)
+
+
+music_slider = ttk.Scale(wnd, from_=0, to=100, orient=HORIZONTAL, value=0, length=360, command=slide)
+music_slider.pack(pady=30)
+
+slider_label = Label(wnd, text="0")
+slider_label.pack(pady=5)
 
 wnd.mainloop()
