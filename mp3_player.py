@@ -24,7 +24,9 @@ song_length = 0
 def duration():
     current_time = pygame.mixer.music.get_pos() / 1000
 
-    converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
+    slider_label.config(text=f"Slider: {int(music_slider.get())} and Song pos: {int(current_time)}")
+
+    # converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
 
     song = song_box.get(ACTIVE)
     song = f"C:/Users/Admin/PycharmProjects/MP3_player/audio/{song}.mp3"
@@ -35,9 +37,22 @@ def duration():
 
     converted_song_length = time.strftime("%M:%S", time.gmtime(song_length))
 
-    time_field.config(text=f"Elapsed time: {converted_current_time} of {converted_song_length}")
+    current_time += 1
+    if int(music_slider.get()) == int(song_length):
+        time_field.config(text=f"Elapsed time: {converted_song_length} of {converted_song_length}")
 
-    music_slider.config(value=int(current_time))
+    elif int(music_slider.get()) == int(current_time):
+        slider_position = int(song_length)
+        music_slider.config(to=slider_position, value=current_time)
+
+    else:
+        slider_position = int(song_length)
+        music_slider.config(to=slider_position, value=int(music_slider.get()))
+        converted_current_time = time.strftime("%M:%S", time.gmtime(int(music_slider.get())))
+        time_field.config(text=f"Elapsed time: {converted_current_time} of {converted_song_length}")
+
+        next_time = int(music_slider.get()) + 1
+        music_slider.config(value=next_time)
 
     time_field.after(1000, duration)
 
@@ -77,15 +92,13 @@ def play():
 
     duration()
 
-    slider_position = int(song_length)
-    music_slider.config(to=slider_position, value=0)
-
 
 def stop():
     pygame.mixer.music.stop()
     song_box.select_clear(ACTIVE)
 
     time_field.config(text="")
+    music_slider.config(value=0)
 
 
 paused = False
@@ -96,6 +109,7 @@ def pause():
     if paused:
         pygame.mixer.music.unpause()
         paused = False
+        music_slider.config(value=pygame.mixer.music.get_pos() / 1000)
     else:
         pygame.mixer.music.pause()
         paused = True
@@ -146,7 +160,12 @@ def previous_song():
 
 
 def slide(x):
-    slider_label.config(text=f"{int(music_slider.get())} of {int(song_length)}")
+    # slider_label.config(text=f"{int(music_slider.get())} of {int(song_length)}")
+    song = song_box.get(ACTIVE)
+    song = f"C:/Users/Admin/PycharmProjects/MP3_player/audio/{song}.mp3"
+
+    pygame.mixer.music.load(song)
+    pygame.mixer.music.play(loops=0, start=music_slider.get())
 
 
 play_btn_img = PhotoImage(file="buttons/btn_play.png")
