@@ -20,11 +20,19 @@ pygame.mixer.init()
 
 song_length = 0
 
+stopped_music = False
+
 
 def duration():
+    if stopped_music:
+        return
+
+    if not song_box.curselection():
+        return
+
     current_time = pygame.mixer.music.get_pos() / 1000
 
-    slider_label.config(text=f"Slider: {int(music_slider.get())} and Song pos: {int(current_time)}")
+    # slider_label.config(text=f"Slider: {int(music_slider.get())} and Song pos: {int(current_time)}")
 
     # converted_current_time = time.strftime("%M:%S", time.gmtime(current_time))
 
@@ -40,6 +48,9 @@ def duration():
     current_time += 1
     if int(music_slider.get()) == int(song_length):
         time_field.config(text=f"Elapsed time: {converted_song_length} of {converted_song_length}")
+
+    elif paused:
+        pass
 
     elif int(music_slider.get()) == int(current_time):
         slider_position = int(song_length)
@@ -74,16 +85,21 @@ def add_many_songs():
 
 
 def delete_one_song():
+    stop()
     song_box.delete(ANCHOR)
     pygame.mixer.music.stop()
 
 
 def delete_all_songs():
+    stop()
     song_box.delete(0, END)
     pygame.mixer.music.stop()
 
 
 def play():
+    global stopped_music
+    stopped_music = False
+
     song = song_box.get(ACTIVE)
     song = f"C:/Users/Admin/PycharmProjects/MP3_player/audio/{song}.mp3"
 
@@ -94,6 +110,9 @@ def play():
 
 
 def stop():
+    global stopped_music
+    stopped_music = True
+
     pygame.mixer.music.stop()
     song_box.select_clear(ACTIVE)
 
@@ -109,13 +128,16 @@ def pause():
     if paused:
         pygame.mixer.music.unpause()
         paused = False
-        music_slider.config(value=pygame.mixer.music.get_pos() / 1000)
+
     else:
         pygame.mixer.music.pause()
         paused = True
 
 
 def next_song():
+    time_field.config(text="")
+    music_slider.config(value=0)
+
     current_song = song_box.curselection()
 
     next_one = current_song[0] + 1
@@ -138,6 +160,9 @@ def next_song():
 
 
 def previous_song():
+    time_field.config(text="")
+    music_slider.config(value=0)
+
     current_song = song_box.curselection()
 
     previous_one = current_song[0] - 1
@@ -209,7 +234,7 @@ time_field.pack(fill=X, side=BOTTOM)
 music_slider = ttk.Scale(wnd, from_=0, to=100, orient=HORIZONTAL, value=0, length=360, command=slide)
 music_slider.pack(pady=30)
 
-slider_label = Label(wnd, text="0")
-slider_label.pack(pady=5)
+# slider_label = Label(wnd, text="0")
+# slider_label.pack(pady=5)
 
 wnd.mainloop()
