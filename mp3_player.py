@@ -8,12 +8,16 @@ import tkinter.ttk as ttk
 
 wnd = Tk()
 wnd.title("Georgi Horozov MP3 Player")
-wnd.geometry("450x550")
+wnd.geometry("450x590")
 wnd_icon = PhotoImage(file="logo/head_phones.png")
 wnd.iconphoto(False, wnd_icon)
 
-song_box = Listbox(wnd, width=65, height=18, bg="#333333", fg="white")
-song_box.pack(pady=20)
+basic_frame = Frame(wnd)
+basic_frame.pack(pady=20)
+
+
+song_box = Listbox(basic_frame, width=65, height=18, bg="#333333", fg="white")
+song_box.grid(row=0, column=0)
 
 pygame.mixer.init()
 
@@ -193,14 +197,18 @@ def slide(x):
     pygame.mixer.music.play(loops=0, start=music_slider.get())
 
 
+def set_volume(val):
+    pygame.mixer.music.set_volume(volume_slider.get())
+
+
 play_btn_img = PhotoImage(file="buttons/btn_play.png")
 stop_btn_img = PhotoImage(file="buttons/btn_stop.png")
 forward_btn_img = PhotoImage(file="buttons/btn_forward.png")
 back_btn_img = PhotoImage(file="buttons/btn_back.png")
 pause_btn_img = PhotoImage(file="buttons/btn_pause.png")
 
-buttons_frame = Frame(wnd)
-buttons_frame.pack()
+buttons_frame = Frame(basic_frame)
+buttons_frame.grid(row=1, column=0, pady=20)
 
 play_button = Button(buttons_frame, image=play_btn_img, bd=0, command=play)
 stop_button = Button(buttons_frame, image=stop_btn_img, bd=0, command=stop)
@@ -231,8 +239,20 @@ time_field = Label(wnd, text="", bd=1, anchor=W)
 time_field.pack(fill=X, side=BOTTOM)
 
 
-music_slider = ttk.Scale(wnd, from_=0, to=100, orient=HORIZONTAL, value=0, length=360, command=slide)
-music_slider.pack(pady=30)
+music_slider = ttk.Scale(basic_frame, from_=0, to=100, orient=HORIZONTAL, value=0, length=360, command=slide)
+music_slider.grid(row=2, column=0, pady=10)
+
+
+volume_frame = Frame(basic_frame)
+volume_frame.grid(row=3, column=0, pady=20, sticky=E)
+
+
+volume_label = Label(volume_frame, text="Volume", font=("Arial", 12))
+volume_label.pack(side=LEFT, anchor=W)
+
+volume_slider = ttk.Scale(volume_frame, from_=0, to=1, orient=HORIZONTAL, value=1, length=150, command=set_volume)
+volume_slider.pack(side=LEFT)
+
 
 # slider_label = Label(wnd, text="0")
 # slider_label.pack(pady=5)
